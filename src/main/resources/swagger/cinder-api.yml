@@ -1,0 +1,121 @@
+openapi: 3.0.0
+info:
+  title: Cinder API文档
+  description: 存储功能模块及接口设计文档
+  version: '0.1'
+  termsOfService: 'http://swagger.io/terms/'
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+servers:
+  - url: 'http://xxxx.test/v1'
+    variables:
+      protocol:
+        enum:
+          - http
+          - https
+        default: https
+    description: Main (production) server
+tags:
+  - name: Volumes
+    description: 卷接口管理
+paths:
+  /volume:
+    post:
+      tags:
+        - Volumes
+      summary: 创建卷
+      description: 创建卷
+      operationId: createVolume
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVolumeRequestBody'
+      responses:
+        '200':
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateVolumeResponseBody'
+        '404':
+          description: 服务未找到
+          content:
+            application/json:
+              schema:
+                type: string
+                default: 服务未找到
+  /volume/{volumeId}:
+    get:
+      tags:
+        - Volume
+      summary: 根据卷id获取卷详情
+      description: 若已经同步到主站，详情包括同步补充信息
+      operationId: getVolumeDetail
+      parameters:
+        - in: path
+          name: volumeId
+          description: 卷id
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: 操作成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Volume'
+        '404':
+          description: 资源未找到
+          content:
+            application/json:
+              schema:
+                type: string
+                default: 资源 未找到
+components:
+  schemas:
+    CreateVolumeRequestBody:
+      description: 创建卷时请求对象
+      type: object
+      properties:
+        volume:
+          $ref: '#/components/schemas/Volume'
+
+    CreateVolumeResponseBody:
+       description: 创建卷时返回对象
+       type: object
+       properties:
+         volume_id:
+           type: integer
+           format: int64
+           description: 卷id
+
+    Volume:
+      description: 卷对象
+      type: object
+      properties:
+        storage_type:
+          enum:
+            - SSD
+            - SATA
+            - SCSI
+          description: '存储类型[SSD, SATA, SCSI]'
+        volume_id:
+          type: integer
+          format: int64
+          description: 卷id
+        volume_name:
+          type: string
+          description: 卷名称
+        size:
+          type: integer
+          format: int64
+          description: 卷大小
+        createTime:
+          type: string
+          format: date-time
+          description: 创建时间
